@@ -12,6 +12,8 @@ Migrated skills:
                   stock_market_data, scrape_page, scrape_platforms,
                   get_current_time, get_system_info, platform_api_search,
                   platform_api_call   (19 total)
+  - media_tools.py: generate_image, generate_audio, generate_music,
+                    generate_video, generate_chart, visualize   (6 total)
 
 Add a new utility by:
   1. Implementing a subclass of BaseIntegrationSkill in this directory
@@ -23,17 +25,18 @@ from __future__ import annotations
 from typing import Dict
 
 from .base import BaseIntegrationSkill
+from .media_tools import MEDIA_TOOLS
 from .web_tools import WEB_TOOLS
 
 
 SKILLS: Dict[str, BaseIntegrationSkill] = {
     **WEB_TOOLS,
+    **MEDIA_TOOLS,
     # Future:
-    # **MEDIA_TOOLS,
     # **DEV_TOOLS,
     # **FILESYSTEM_TOOLS,
     # (see RG_Chat/app/services/tools/ for the remaining files; their
-    # migration follows the same pattern as web_tools.)
+    # migration follows the same pattern as web_tools / media_tools.)
 }
 
 
