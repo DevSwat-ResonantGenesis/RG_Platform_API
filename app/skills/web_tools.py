@@ -202,22 +202,64 @@ class GetCurrentTimeTool(BaseIntegrationSkill):
         }
 
 class GetSystemInfoTool(BaseIntegrationSkill):
+    """Live system info — queries the canonical tool registry at call time
+    so numbers stay accurate as the platform grows."""
+
     skill_id = "get_system_info"
     skill_name = "System Info"
     api_key_names = []
 
     async def execute(self, message: str, user_id: str, context: Dict[str, Any]) -> Dict[str, Any]:
+        # Tool inventory — read live from the canonical registry.
+        tool_count: int = 0
+        category_count: int = 0
+        try:
+            from rg_tool_registry import build_registry
+
+            registry = build_registry()
+            tools = list(registry.get_all())
+            tool_count = len(tools)
+            category_count = len({getattr(t, "category", None) for t in tools if getattr(t, "category", None)})
+        except Exception as e:
+            logger.warning(f"get_system_info: registry lookup failed: {e}")
+
+        # Service inventory — kept as a labelled list rather than a magic number
+        # so it is self-documenting. Update this list when adding a service.
+        services = [
+            "auth_service", "user_service", "gateway",
+            "chat_service", "public_guest_chat_service",
+            "llm_service", "agent_architect", "agent_engine_service",
+            "agent_engine_celery_worker", "memory_service", "ed_service",
+            "ide_service", "rg_ast_analysis", "code_execution_service",
+            "sandbox_runner_service", "storage_service",
+            "rg_integrations", "rg_platform_api", "openclaw_service",
+            "marketplace_service", "notification_service", "billing_service",
+            "crypto_service", "workflow_service", "discord_bridge_service",
+            "blockchain_service", "external_blockchain_service",
+            "lighthouse_service", "mining_service", "dsid_node",
+            "rg_internal_invarients_sim", "rg_users_invarients_sim",
+        ]
+
+        summary = (
+            "**DevSwat Platform — Live System Info**\n\n"
+            f"- **Tools:** {tool_count} registered across {category_count} categories\n"
+            f"- **Microservices:** {len(services)} running\n"
+            "- **Architecture:** registry-dispatched tool execution; chat_service\n"
+            "  delegates skills over HTTP to `rg_integrations` (3rd-party OAuth)\n"
+            "  and `rg_platform_api` (platform utilities).\n"
+            "- **Agent layer:** Agent Architect + Agent Engine orchestrate\n"
+            "  multi-step plans against the live tool registry.\n"
+            "- **Memory:** dedicated `memory_service` with semantic-anchor storage.\n"
+        )
+
         return {
             "success": True,
             "action": "get_system_info",
-            "summary": (
-                "**Resonant Genesis System**\n\n"
-                "- Platform: ResonantGraph AI v2.0\n"
-                "- Tools: 208 across 15+ categories\n"
-                "- Services: 27 microservices running\n"
-                "- Agent Architect: 29 real tools\n"
-                "- Memory: Hash Sphere with 3D semantic coordinates\n"
-            ),
+            "tool_count": tool_count,
+            "category_count": category_count,
+            "service_count": len(services),
+            "services": services,
+            "summary": summary,
         }
 
 # ── Platform API (generic proxy) ──
