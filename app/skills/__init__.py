@@ -25,6 +25,8 @@ from __future__ import annotations
 from typing import Dict
 
 from .base import BaseIntegrationSkill
+from .dev_tools import DEV_TOOLS
+from .filesystem_tools import FILESYSTEM_TOOLS
 from .media_tools import MEDIA_TOOLS
 from .web_tools import WEB_TOOLS
 
@@ -32,11 +34,12 @@ from .web_tools import WEB_TOOLS
 SKILLS: Dict[str, BaseIntegrationSkill] = {
     **WEB_TOOLS,
     **MEDIA_TOOLS,
-    # Future:
-    # **DEV_TOOLS,
-    # **FILESYSTEM_TOOLS,
-    # (see RG_Chat/app/services/tools/ for the remaining files; their
-    # migration follows the same pattern as web_tools / media_tools.)
+    # 4 dev tools: execute_code, http_request, external_http_request, dev_tool.
+    **DEV_TOOLS,
+    # 13 filesystem/IDE tools: file_read/write/edit/list/delete, multi_edit,
+    # grep_search, find_by_name, run_command, command_status,
+    # file_download_curl, file_upload_curl, file_extract_zip.
+    **FILESYSTEM_TOOLS,
 }
 
 
